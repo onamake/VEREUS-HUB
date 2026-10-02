@@ -1,0 +1,290 @@
+-- VEREUS HUB â€” Cosmetic-only Roblox Studio LocalScript
+-- Place this LocalScript in StarterPlayer > StarterPlayerScripts.
+-- This is a standalone visual UI. It does not include exploit, bypass, kick, or ban features.
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+local BLACK = Color3.fromRGB(12, 12, 15)
+local PANEL = Color3.fromRGB(23, 23, 29)
+local BUTTON = Color3.fromRGB(37, 37, 46)
+local ACCENT = Color3.fromRGB(70, 130, 255)
+local WHITE = Color3.fromRGB(240, 240, 245)
+local MUTED = Color3.fromRGB(160, 160, 172)
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "VereusHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = UDim2.fromOffset(520, 350)
+main.Position = UDim2.new(0.5, -260, 0.5, -175)
+main.BackgroundColor3 = BLACK
+main.BorderSizePixel = 0
+main.Parent = gui
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(55, 55, 68)
+stroke.Thickness = 1
+stroke.Parent = main
+
+local top = Instance.new("Frame")
+top.Size = UDim2.new(1, 0, 0, 58)
+top.BackgroundColor3 = PANEL
+top.BorderSizePixel = 0
+top.Parent = main
+Instance.new("UICorner", top).CornerRadius = UDim.new(0, 14)
+
+local title = Instance.new("TextLabel")
+title.BackgroundTransparency = 1
+title.Position = UDim2.fromOffset(20, 8)
+title.Size = UDim2.new(1, -40, 0, 25)
+title.Font = Enum.Font.GothamBold
+title.Text = "VEREUS HUB"
+title.TextColor3 = WHITE
+title.TextSize = 19
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = top
+
+local subtitle = Instance.new("TextLabel")
+subtitle.BackgroundTransparency = 1
+subtitle.Position = UDim2.fromOffset(21, 33)
+subtitle.Size = UDim2.new(1, -40, 0, 16)
+subtitle.Font = Enum.Font.Gotham
+subtitle.Text = "COSMETICS  â€¢  LOCAL VISUALS"
+subtitle.TextColor3 = MUTED
+subtitle.TextSize = 10
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = top
+
+local sidebar = Instance.new("Frame")
+sidebar.Position = UDim2.fromOffset(14, 72)
+sidebar.Size = UDim2.fromOffset(142, 264)
+sidebar.BackgroundTransparency = 1
+sidebar.Parent = main
+
+local content = Instance.new("Frame")
+content.Position = UDim2.fromOffset(170, 72)
+content.Size = UDim2.new(1, -184, 1, -86)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+local pages = {}
+local currentPage
+
+local function makePage(name)
+    local page = Instance.new("Frame")
+    page.Name = name
+    page.Size = UDim2.fromScale(1, 1)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    page.Parent = content
+    pages[name] = page
+    return page
+end
+
+local function switchPage(name)
+    for pageName, page in pairs(pages) do
+        page.Visible = pageName == name
+    end
+    currentPage = name
+end
+
+local function makeButton(parent, text, position, size, callback)
+    local button = Instance.new("TextButton")
+    button.Size = size or UDim2.new(1, 0, 0, 38)
+    button.Position = position or UDim2.new()
+    button.BackgroundColor3 = BUTTON
+    button.BorderSizePixel = 0
+    button.AutoButtonColor = false
+    button.Font = Enum.Font.GothamMedium
+    button.Text = text
+    button.TextColor3 = WHITE
+    button.TextSize = 12
+    button.Parent = parent
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 9)
+
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = ACCENT}):Play()
+    end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = BUTTON}):Play()
+    end)
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
+
+local function makeSectionLabel(parent, text, y)
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.fromOffset(2, y)
+    label.Size = UDim2.new(1, -4, 0, 22)
+    label.Font = Enum.Font.GothamBold
+    label.Text = text
+    label.TextColor3 = WHITE
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = parent
+    return label
+end
+
+local function getCharacter()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+local function removeCosmetic(name)
+    local character = player.Character
+    if not character then return end
+    local old = character:FindFirstChild(name)
+    if old then old:Destroy() end
+end
+
+local function addHandheldProp(name, bladeColor, handleColor, isHammer)
+    removeCosmetic(name)
+    local character = getCharacter()
+    local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+    if not hand then return end
+
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = character
+
+    local function part(partName, size, color, offset, material)
+        local p = Instance.new("Part")
+        p.Name = partName
+        p.Size = size
+        p.Color = color
+        p.Material = material or Enum.Material.Metal
+        p.CanCollide = false
+        p.CanTouch = false
+        p.CanQuery = false
+        p.Massless = true
+        p.Anchored = false
+        p.Parent = model
+        p.CFrame = hand.CFrame * offset
+        local weld = Instance.new("WeldConstraint")
+        weld.Part0 = hand
+        weld.Part1 = p
+        weld.Parent = p
+        return p
+    end
+
+    if isHammer then
+        part("Handle", Vector3.new(0.16, 1.5, 0.16), handleColor,
+            CFrame.new(0, -0.2, -0.55) * CFrame.Angles(math.rad(15), 0, math.rad(10)),
+            Enum.Material.Wood)
+        part("HammerHead", Vector3.new(0.85, 0.48, 0.48), bladeColor,
+            CFrame.new(0, 0.55, -0.55) * CFrame.Angles(math.rad(15), 0, math.rad(10)),
+            Enum.Material.Metal)
+    else
+        part("Handle", Vector3.new(0.18, 0.55, 0.18), handleColor,
+            CFrame.new(0, -0.25, -0.55) * CFrame.Angles(math.rad(15), 0, math.rad(10)),
+            Enum.Material.Wood)
+        part("Guard", Vector3.new(0.5, 0.09, 0.2), handleColor,
+            CFrame.new(0, 0.08, -0.55) * CFrame.Angles(math.rad(15), 0, math.rad(10)))
+        part("Blade", Vector3.new(0.12, 2.0, 0.28), bladeColor,
+            CFrame.new(0, 1.12, -0.55) * CFrame.Angles(math.rad(15), 0, math.rad(10)),
+            Enum.Material.Metal)
+    end
+end
+
+local function clearSkin()
+    local character = player.Character
+    if not character then return end
+    for _, obj in ipairs(character:GetChildren()) do
+        if obj:IsA("BasePart") and obj:GetAttribute("VereusOriginalColor") then
+            obj.Color = obj:GetAttribute("VereusOriginalColor")
+            obj:SetAttribute("VereusOriginalColor", nil)
+        end
+    end
+end
+
+local function applySkin(color)
+    local character = getCharacter()
+    for _, obj in ipairs(character:GetChildren()) do
+        if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
+            if not obj:GetAttribute("VereusOriginalColor") then
+                obj:SetAttribute("VereusOriginalColor", obj.Color)
+            end
+            obj.Color = color
+        end
+    end
+end
+
+local cosmetics = makePage("Cosmetics")
+makeSectionLabel(cosmetics, "VISUAL ITEMS", 2)
+makeButton(cosmetics, "Show Katana", UDim2.fromOffset(0, 34), UDim2.new(1, 0, 0, 38), function()
+    addHandheldProp("VereusKatana", Color3.fromRGB(190, 205, 225), Color3.fromRGB(40, 40, 48), false)
+end)
+makeButton(cosmetics, "Show Ban Hammer", UDim2.fromOffset(0, 82), UDim2.new(1, 0, 0, 38), function()
+    addHandheldProp("VereusBanHammer", Color3.fromRGB(85, 130, 255), Color3.fromRGB(95, 65, 42), true)
+end)
+makeButton(cosmetics, "Hide Visual Items", UDim2.fromOffset(0, 130), UDim2.new(1, 0, 0, 38), function()
+    removeCosmetic("VereusKatana")
+    removeCosmetic("VereusBanHammer")
+end)
+
+local skins = makePage("Skins")
+makeSectionLabel(skins, "LOCAL COLOR PRESETS", 2)
+local skinColors = {
+    {"Midnight", Color3.fromRGB(35, 39, 52)},
+    {"Crimson", Color3.fromRGB(155, 45, 65)},
+    {"Azure", Color3.fromRGB(55, 115, 205)},
+    {"Violet", Color3.fromRGB(115, 70, 175)},
+    {"Restore Original", nil},
+}
+for i, entry in ipairs(skinColors) do
+    local label, color = entry[1], entry[2]
+    makeButton(skins, label, UDim2.fromOffset(0, 30 + (i - 1) * 46), UDim2.new(1, 0, 0, 36), function()
+        if color then applySkin(color) else clearSkin() end
+    end)
+end
+
+local info = makePage("Info")
+makeSectionLabel(info, "ABOUT", 2)
+local note = Instance.new("TextLabel")
+note.BackgroundTransparency = 1
+note.Position = UDim2.fromOffset(2, 34)
+note.Size = UDim2.new(1, -4, 0, 120)
+note.Font = Enum.Font.Gotham
+note.Text = "VEREUS HUB\nCosmetic-only sample interface.\nItems and skin colors are local visuals for testing in your own Roblox experience."
+note.TextColor3 = MUTED
+note.TextSize = 12
+note.TextWrapped = true
+note.TextXAlignment = Enum.TextXAlignment.Left
+note.TextYAlignment = Enum.TextYAlignment.Top
+note.Parent = info
+
+local navItems = {"Cosmetics", "Skins", "Info"}
+for i, name in ipairs(navItems) do
+    makeButton(sidebar, name, UDim2.fromOffset(0, (i - 1) * 46), UDim2.new(1, 0, 0, 38), function()
+        switchPage(name)
+    end)
+end
+
+switchPage("Cosmetics")
+
+-- Drag the panel using the header.
+local dragging = false
+local dragStart, startPos
+top.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+top.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
